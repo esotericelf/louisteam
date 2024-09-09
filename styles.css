@@ -1,0 +1,314 @@
+/* General body styling */
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100vh;
+    margin: 20px;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f5f5;
+}
+
+
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 80%;
+    background-color: #253028;
+    /* Google blue */
+    color: white;
+    padding: 20px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+}
+
+.navbar-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-item {
+    margin: 0 20px;
+}
+
+.navbar-link {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.navbar-link:hover {
+    color: #649aeb;
+    /* Google yellow */
+}
+
+/* Style the select dropdown */
+select {
+    width: auto;
+    max-width: 1600px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 16px;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    margin-bottom: 20px;
+    /* Add space between the dropdown and the button */
+    appearance: none;
+    /* Remove default arrow */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23999" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px 16px;
+}
+
+select:focus {
+    border-color: #4285f4;
+    box-shadow: 0 0 8px rgba(66, 133, 244, 0.2);
+    outline: none;
+}
+
+/* Style the button */
+button {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    background-color: #4285f4;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, box-shadow 0.3s;
+    margin-top: 20px;
+    /* Add space between the dropdown and the button */
+}
+
+button:hover {
+    background-color: #357ae8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+button:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(66, 133, 244, 0.4);
+}
+
+/* Style the result section */
+#result {
+    width: 100%;
+    max-width: 400px;
+    text-align: left;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+#result h3 {
+    font-size: 18px;
+    margin: 10px 0;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+#result ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#result li {
+    background-color: #f9f9f9;
+    padding: 10px;
+    margin: 6px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Add space between text and remove button */
+}
+
+#result li:not(:last-child) {
+    margin-bottom: 8px;
+}
+
+/* Style the modal */
+.modal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Black w/ opacity */
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    /* Could be more or less, depending on screen size */
+}
+
+.modal-content h2 {
+    margin-top: 0;
+}
+
+.modal-content label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.modal-content textarea {
+    resize: vertical;
+    /* Allow vertical resizing */
+}
+
+.modal-content button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.modal-content button:hover {
+    background-color: #357ae8;
+}
+
+/* Style the remove button */
+.remove {
+    color: red;
+    cursor: pointer;
+    margin-left: 10px;
+    position: relative;
+    width: 12px;
+    /* Reduced size */
+    height: 12px;
+    /* Reduced size */
+}
+
+.remove::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: red;
+    transform: translateY(-50%);
+}
+
+/* Style the add item section */
+.add-item {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.add-item input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+    box-sizing: border-box;
+}
+
+.add-item .add-icon {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 20px;
+    /* Adjusted size */
+    height: 20px;
+    /* Adjusted size */
+}
+
+.add-item .add-icon::before,
+.add-item .add-icon::after {
+    content: '';
+    position: absolute;
+    background-color: green;
+}
+
+.add-item .add-icon::before {
+    width: 2px;
+    height: 100%;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+}
+
+.add-item .add-icon::after {
+    width: 100%;
+    height: 2px;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.add-item .add-icon:hover::before,
+.add-item .add-icon:hover::after {
+    background-color: darkgreen;
+}
+
+/* Flash animation for newly added items */
+@keyframes flash {
+    0% {
+        background-color: #e0f7fa;
+    }
+
+    100% {
+        background-color: #f9f9f9;
+    }
+}
+
+.new-item {
+    animation: flash 1s ease-in-out;
+}

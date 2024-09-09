@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Draft</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="csvData.js" defer></script>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <ul class="navbar-list">
+            <li class="navbar-item"><a href="index.html" class="navbar-link">Functional Group</a></li>
+            <li class="navbar-item"><a href="BCP.html" class="navbar-link active">BCP</a></li>
+            <li class="navbar-item"><a href="account-opening.html" class="navbar-link">Account Opening</a></li>
+            <li class="navbar-item"><a href="reserve-foreign-notes.html" class="navbar-link">Reserve Foreign Notes</a>
+            </li>
+            <li class="navbar-item"><a href="br-cases.html" class="navbar-link">Br Cases</a></li>
+        </ul>
+    </nav>
+    <br>
+    <br>
+    <br>
+    <br>
+    <select id="dropdown">
+        <option value="" disabled selected>Select an item</option>
+    </select>
+    <button id="generateEmail">Generate .eml File</button>
+    <div id="result">
+        <h3>TO</h3>
+        <ul id="to"></ul>
+        <div class="add-item">
+            <input type="text" id="newToItem" placeholder="Add new TO item" oninput="autocomplete(this, 'to')">
+            <span class="add-icon" onclick="addItem('to', 'newToItem')"></span>
+        </div>
+        <h3>CC</h3>
+        <ul id="cc"></ul>
+        <div class="add-item">
+            <input type="text" id="newCcItem" placeholder="Add new CC item" oninput="autocomplete(this, 'cc')">
+            <span class="add-icon" onclick="addItem('cc', 'newCcItem')"></span>
+        </div>
+        <h3>BCC</h3>
+        <ul id="bcc"></ul>
+        <div class="add-item">
+            <input type="text" id="newBccItem" placeholder="Add new BCC item" oninput="autocomplete(this, 'bcc')">
+            <span class="add-icon" onclick="addItem('bcc', 'newBccItem')"></span>
+        </div>
+    </div>
+
+    <!-- Custom Modal Dialog -->
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Email Details</h2>
+            <label for="fromEmail">From:</label>
+            <input type="email" id="fromEmail" name="fromEmail" value="jimwan@dbs.com">
+            <label for="emailTitle">Email title:</label>
+            <input type="text" id="emailTitle" name="emailTitle">
+            <label for="emailBody">Enter email body:</label>
+            <textarea id="emailBody" name="emailBody" rows="10"></textarea>
+            <button id="submitEmail">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        function parseCSV(data) {
+            if (!data) {
+                console.error('No data to parse');
+                return [];
+            }
+            const rows = data.trim().split('\n').filter(row => row.trim() !== '');
+            return rows.map(row => {
+                const columns = row.split(',');
+                return {
+                    columnA: columns[0].trim(),
+                    columnB: columns[1].trim(),
+                    columnC: columns[2].trim()
+                };
+            });
+        }
+
+        function populateDropdown(items) {
+            const dropdown = document.getElementById('dropdown');
+            const uniqueItems = [...new Set(items.map(item => item.columnA))];
+            if (uniqueItems.length === 0) {
+                console.warn('No items to populate in the dropdown');
+                return;
+            }
+            uniqueItems.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                dropdown.appendChild(option);
+            });
+        }
+
+        function displaySelectedItems(items, selectedItem) {
+            const toList = document.getElementById('to');
+            const ccList = document.getElementById('cc');
+            const bccList = document.getElementById('bcc');
+
+            toList.innerHTML = '';
+            ccList.innerHTML = '';
+            bccList.innerHTML = '';
+
+            items.forEach(item => {
+                if (item.columnA === selectedItem) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = item.columnC;
+                    const removeButton = document.createElement('span');
+                    removeButton.className = 'remove';
+                    removeButton.onclick = function () {
+                        listItem.remove();
+                    };
+                    listItem.appendChild(removeButton);
+                    if (item.columnB === 'TO') {
+                        toList.appendChild(listItem);
+                    } else if (item.columnB === 'CC') {
+                        ccList.appendChild(listItem);
+                    } else if (item.columnB === 'BCC') {
+                        bccList.appendChild(listItem);
+                    }
+                }
+            });
+        }
+
+        function addItem(listId, inputId) {
+            const list = document.getElementById(listId);
+            const input = document.getElementById(inputId);
+            const newItemText = input.value.trim();
+            if (newItemText === '') return;
+
+            const listItem = document.createElement('li');
+            listItem.textContent = newItemText;
+            listItem.classList.add('new-item'); // Add the new-item class
+            const removeButton = document.createElement('span');
+            removeButton.className = 'remove';
+            removeButton.onclick = function () {
+                listItem.remove();
+            };
+            listItem.appendChild(removeButton);
+            list.appendChild(listItem);
+            input.value = '';
+
+            // Remove the new-item class after the animation ends
+            setTimeout(() => {
+                listItem.classList.remove('new-item');
+            }, 1000);
+        }
+
+        function generateEML(fromEmail, emailTitle, emailBody) {
+            const toList = Array.from(document.getElementById('to').children).map(li => li.textContent.replace(' -', '')).join(', ');
+            const ccList = Array.from(document.getElementById('cc').children).map(li => li.textContent.replace(' -', '')).join(', ');
+            const bccList = Array.from(document.getElementById('bcc').children).map(li => li.textContent.replace(' -', '')).join(', ');
+
+            const emlContent = `
+From: ${fromEmail}
+To: ${toList}
+CC: ${ccList}
+BCC: ${bccList}
+Subject: ${emailTitle}
+
+${emailBody}
+            `.trim();
+
+            const blob = new Blob([emlContent], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${emailTitle}.eml`;
+            link.click();
+        }
+
+        function init() {
+            const items = parseCSV(csvData);
+            populateDropdown(items);
+
+            const dropdown = document.getElementById('dropdown');
+            dropdown.addEventListener('change', (event) => {
+                const selectedItem = event.target.value;
+                displaySelectedItems(items, selectedItem);
+            });
+
+            const generateEmailButton = document.getElementById('generateEmail');
+            generateEmailButton.addEventListener('click', () => {
+                document.getElementById('emailModal').style.display = 'block';
+            });
+
+            const modal = document.getElementById('emailModal');
+            const closeModal = document.getElementsByClassName('close')[0];
+            const submitEmailButton = document.getElementById('submitEmail');
+
+            closeModal.onclick = function () {
+                modal.style.display = 'none';
+            }
+
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+
+            submitEmailButton.addEventListener('click', () => {
+                const fromEmail = document.getElementById('fromEmail').value;
+                const emailTitle = document.getElementById('emailTitle').value;
+                const emailBody = document.getElementById('emailBody').value;
+                generateEML(fromEmail, emailTitle, emailBody);
+                modal.style.display = 'none';
+            });
+
+            // Add event listeners for Enter key on input fields
+            document.getElementById('newToItem').addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    addItem('to', 'newToItem');
+                }
+            });
+
+            document.getElementById('newCcItem').addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    addItem('cc', 'newCcItem');
+                }
+            });
+
+            document.getElementById('newBccItem').addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    addItem('bcc', 'newBccItem');
+                }
+            });
+        }
+
+        function autocomplete(input, listId) {
+            const list = document.getElementById(listId);
+            const filter = input.value.toLowerCase();
+            const items = Array.from(list.children).map(li => li.textContent.toLowerCase());
+            const suggestions = items.filter(item => item.includes(filter));
+
+            // Remove existing suggestions
+            let suggestionBox = document.getElementById(`${listId}-suggestions`);
+            if (suggestionBox) {
+                suggestionBox.remove();
+            }
+
+            // Create a new suggestion box
+            suggestionBox = document.createElement('div');
+            suggestionBox.id = `${listId}-suggestions`;
+            suggestionBox.className = 'suggestions';
+            input.parentNode.appendChild(suggestionBox);
+
+            // Add suggestions to the suggestion box
+            suggestions.forEach(suggestion => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                suggestionItem.textContent = suggestion;
+                suggestionItem.onclick = () => {
+                    input.value = suggestion;
+                    suggestionBox.remove();
+                };
+                suggestionBox.appendChild(suggestionItem);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

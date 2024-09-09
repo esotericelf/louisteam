@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Opening</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="account-opening.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul class="navbar-list">
+            <li class="navbar-item"><a href="index.html" class="navbar-link">Functional Group</a></li>
+            <li class="navbar-item"><a href="BCP.html" class="navbar-link">BCP</a></li>
+            <li class="navbar-item"><a href="account-opening.html" class="navbar-link active">Account Opening</a></li>
+            <li class="navbar-item"><a href="reserve-foreign-notes.html" class="navbar-link">Reserve Foreign Notes</a>
+            </li>
+            <li class="navbar-item"><a href="br-cases.html" class="navbar-link">Br Cases</a></li>
+        </ul>
+    </nav>
+    <br>
+    <br>
+
+    <div class="account-opening-container">
+        <h2>Account Opening Appointment</h2>
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="mobile">Mobile:</label>
+                <input type="text" id="mobile" name="mobile" required>
+            </div>
+            <div class="form-group">
+                <label for="appointmentDate">Appointment Date:</label>
+                <input type="date" id="appointmentDate" name="appointmentDate" required>
+            </div>
+            <div class="form-group">
+                <label for="appointmentTime">Appointment Time:</label>
+                <input type="time" id="appointmentTime" name="appointmentTime" required>
+            </div>
+            <div class="form-group">
+                <label for="branch">Branch:</label>
+                <select id="branch" name="branch" required></select>
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="Mass">Mass</option>
+                    <option value="TRE">TRE</option>
+                    <option value="TPC">TPC</option>
+                    <option value="PB">PB</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cif">CIF:</label>
+                <input type="text" id="cif" name="cif" required>
+            </div>
+            <div class="form-group">
+                <label for="caseNumber">Case Number:</label>
+                <input type="text" id="caseNumber" name="caseNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Message:</label>
+                <textarea id="message" name="message"></textarea>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        const branches = {
+            "001": "Central Branch",
+            "002": "Kowloon Branch",
+            "003": "New Territories Branch",
+            "004": "Hong Kong Island Branch"
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const branchSelect = document.getElementById('branch');
+            for (const [key, value] of Object.entries(branches)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = value;
+                branchSelect.appendChild(option);
+            }
+
+            // Set default appointment date to two days after today
+            const appointmentDateInput = document.getElementById('appointmentDate');
+            const today = new Date();
+            const twoDaysLater = new Date(today);
+            twoDaysLater.setDate(today.getDate() + 2);
+            const yyyy = twoDaysLater.getFullYear();
+            const mm = String(twoDaysLater.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const dd = String(twoDaysLater.getDate()).padStart(2, '0');
+            appointmentDateInput.value = `${yyyy}-${mm}-${dd}`;
+
+            // Add event listeners to navbar links
+            const navbarLinks = document.querySelectorAll('.navbar-link');
+            navbarLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    navbarLinks.forEach(link => link.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Handle form submission
+            const form = document.getElementById('appointmentForm');
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const name = document.getElementById('name').value;
+                const mobile = document.getElementById('mobile').value;
+                const appointmentDate = document.getElementById('appointmentDate').value;
+                const appointmentTime = document.getElementById('appointmentTime').value;
+                const branch = document.getElementById('branch').value;
+                const category = document.getElementById('category').value;
+                const cif = document.getElementById('cif').value;
+                const message = document.getElementById('message').value;
+
+                if (!name || !mobile || !appointmentDate || !appointmentTime || !branch || !category || !cif || !caseNumber) {
+                    alert('Please fill in all required fields.');
+                    return;
+                }
+
+                const dateTime = new Date().toLocaleString();
+
+                const modalMessage = `
+                    <table>
+                        <tr><th>Date and Time:</th><td>${dateTime}</td></tr>
+                        <tr><th>Name of Customer:</th><td>${name}</td></tr>
+                        <tr><th>Customer Segment:</th><td>New Customer</td></tr>
+                        <tr><th>CIF:</th><td>${cif}</td></tr>
+                        <tr><th>Mobile:</th><td>${mobile}</td></tr>
+                        <tr><th>Messages:</th><td>${name} wants to open ${category} account at BR${branch} on ${appointmentDate} at ${appointmentTime}</td></tr>
+                        <tr><th>Action Required:</th><td>Please call back ${name}, ${message}</td></tr>
+                    </table>
+                `;
+
+                document.getElementById('modalMessage').innerHTML = modalMessage;
+                document.getElementById('modal').style.display = 'block';
+            });
+
+            // Handle modal close
+            const modal = document.getElementById('modal');
+            const closeModal = document.querySelector('.close');
+            closeModal.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

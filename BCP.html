@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCP List</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="BCP.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul class="navbar-list">
+            <li class="navbar-item"><a href="index.html" class="navbar-link">Functional Group</a></li>
+            <li class="navbar-item"><a href="BCP.html" class="navbar-link active">BCP</a></li>
+            <li class="navbar-item"><a href="account-opening.html" class="navbar-link">Account Opening</a></li>
+            <li class="navbar-item"><a href="reserve-foreign-notes.html" class="navbar-link">Reserve Foreign Notes</a>
+            </li>
+            <li class="navbar-item"><a href="br-cases.html" class="navbar-link">Br Cases</a></li>
+        </ul>
+    </nav>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="container">
+        <div class="column">
+            <h4 class="header-title">Select BCP Items</h4>
+            <ul id="itemList" class="item-list"></ul>
+        </div>
+        <div class="column">
+            <h4 class="header-title">Selected Items:</h4>
+            <pre id="result" class="result-display"></pre>
+        </div>
+    </div>
+    <div class="cif-input-container">
+        <input type="text" class="cif-input" id="cifInput" placeholder="Enter CIF">
+    </div>
+    <br>
+    <div class="cif-input-container">
+        <input type="text" class="cif-input" id="maIssuesInput" placeholder="Enter MA issue">
+    </div>
+    <br>
+    <div class="cif-input-container">
+        <button id="submitButton" class="cif-input">Submit</button>
+    </div>
+
+    <!-- Custom Modal -->
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <!-- Section to display submission results -->
+    <div id="submissionResults" class="submission-results"></div>
+
+    <script type="module">
+        // Define the bcpString directly in the script
+        const bcpString = `Finese Registered Mobile, estmt email, correspondence address, HKID, passport ID, Full Name, DOB, Account Number, Phone Banking Number, Last Transaction Details`;
+        const recipients = `A00001; A00002; A00003; A00004; A00005;`;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const result = [];
+            const itemList = document.getElementById('itemList');
+            const resultDisplay = document.getElementById('result');
+            const submitButton = document.getElementById('submitButton');
+            const modal = document.getElementById('customModal');
+            const modalMessage = document.getElementById('modalMessage');
+            const closeButton = document.querySelector('.close-button');
+            const submissionResults = document.getElementById('submissionResults');
+
+            // Parse the BCP string into an array
+            const items = bcpString.split(',').map(item => item.trim());
+            // Render the items as a list
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item; // Set the text for the list item
+                li.classList.add('item');
+                li.addEventListener('click', () => {
+                    li.classList.toggle('selected');
+                    if (result.includes(item)) {
+                        result.splice(result.indexOf(item), 1);
+                    } else {
+                        result.push(item);
+                    }
+                    resultDisplay.textContent = JSON.stringify(result, null, 2);
+                });
+                itemList.appendChild(li); // Append the list item to the unordered list
+            });
+
+            // Function to check conditions on submission
+            submitButton.addEventListener('click', () => {
+                const cifInput = document.getElementById('cifInput').value.trim();
+                const maIssuesInput = document.getElementById('maIssuesInput').value.trim();
+                let message = '';
+
+                if (result.length !== 4) {
+                    message += 'Please select exactly four items.\n';
+                }
+                if (!cifInput) {
+                    message += 'Please enter the CIF.\n';
+                }
+                if (!maIssuesInput) {
+                    message += 'Please enter the MA issues.\n';
+                }
+
+                if (message) {
+                    modalMessage.textContent = message;
+                    modal.style.display = 'block';
+                } else {
+                    modalMessage.textContent = 'Submission successful!';
+                    modal.style.display = 'block';
+
+                    // Store the result in a tabulated format
+                    const dateTime = new Date().toLocaleString();
+                    const [date, time] = dateTime.split(', ');
+                    const table = document.createElement('table');
+                    table.classList.add('result-table');
+
+                    const data = {
+                        'Date and Time': dateTime,
+                        'CIF': cifInput,
+                        'MA Issues': maIssuesInput,
+                        'Selected Items': result.join(', ')
+                    };
+
+                    for (const [key, value] of Object.entries(data)) {
+                        const row = table.insertRow();
+                        const cell1 = row.insertCell(0);
+                        const cell2 = row.insertCell(1);
+                        cell1.textContent = key;
+                        cell2.textContent = value;
+                    }
+
+                    submissionResults.appendChild(table);
+
+                    // Generate .eml file
+                    const emailContent = `
+From: jimwan@dbs.com
+To: ${recipients.replace(/; /g, ', ')}
+Subject: MA BCP ${time} ${date}
+Date: ${new Date().toUTCString()}
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+
+<!DOCTYPE html>
+<html>
+<body>
+<p>Dear all,</p>
+<table border="1" style="border-collapse: collapse;">
+  <tr>
+    <th>Date and Time</th>
+    <td>${dateTime}</td>
+  </tr>
+    <tr>
+    <th>MA Issues</th>
+    <td>${maIssuesInput}</td>
+  </tr>
+  <tr>
+    <th>CIF</th>
+    <td>${cifInput}</td>
+  </tr>
+  <tr>
+    <th>Verified</th>
+    <td>${result.join(', ')}</td>
+  </tr>
+</table>
+</body>
+</html>
+                    `.trim();
+
+                    const blob = new Blob([emailContent], { type: 'text/plain' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `MA BCP${time} ${date}.eml`;
+                    link.click();
+                }
+            });
+
+            // Close the modal when the close button is clicked
+            closeButton.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            // Close the modal when clicking outside of the modal content
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
