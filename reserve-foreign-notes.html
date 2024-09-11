@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserve Foreign Notes</title>
+    <link rel="stylesheet" href="account-opening.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul class="navbar-list">
+            <li class="navbar-item"><a href="index.html" class="navbar-link">Functional Group</a></li>
+            <li class="navbar-item"><a href="BCP.html" class="navbar-link">BCP</a></li>
+            <li class="navbar-item"><a href="account-opening.html" class="navbar-link">Account Opening</a></li>
+            <li class="navbar-item"><a href="reserve-foreign-notes.html" class="navbar-link active">Reserve Foreign
+                    Notes</a></li>
+            <li class="navbar-item"><a href="br-cases.html" class="navbar-link">Br Cases</a></li>
+        </ul>
+    </nav>
+    <br>
+    <div class="account-opening-container">
+        <h2>Reserve Foreign Notes</h2>
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label for="customerName">Customer Name:</label>
+                <input type="text" id="customerName" name="customerName" required>
+            </div>
+            <div class="form-group">
+                <label for="mobileNumber">Mobile Number:</label>
+                <input type="tel" id="mobileNumber" name="mobileNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="currency">Currency:</label>
+                <select id="currency" name="currency" required>
+                    <option value="USD">$ USD</option>
+                    <option value="EUR">€ EUR</option>
+                    <option value="GBP">£ GBP</option>
+                    <option value="JPY">¥ JPY</option>
+                    <option value="AUD">$ AUD</option>
+                    <option value="CAD">$ CAD</option>
+                    <option value="CNY">¥ CNY</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount:</label>
+                <input type="text" id="amountDisplay" required>
+                <input type="hidden" id="amount" name="amount" required>
+            </div>
+            <div class="form-group">
+                <label for="cif">CIF:</label>
+                <input type="text" id="cif" name="cif" required>
+            </div>
+            <div class="form-group">
+                <label for="segment">Customer Segment:</label>
+                <select id="segment" name="segment" required>
+                    <option value="mass">Mass</option>
+                    <option value="TRE">Treasure</option>
+                    <option value="TPC">TPC</option>
+                    <option value="PB">PB</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="branch">Branch:</label>
+                <select id="branch" name="branch" required></select>
+            </div>
+            <div class="form-group">
+                <label for="caseNumber">Case Number/Ext:</label>
+                <input type="text" id="caseNumber" name="caseNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="withdrawDate">Withdraw Date:</label>
+                <input type="date" id="withdrawDate" name="withdrawDate" required>
+            </div>
+            <div class="form-group">
+                <label for="withdrawTime">Withdraw Time:</label>
+                <input type="time" id="withdrawTime" name="withdrawTime" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        const branches = {
+            "001": "Central Branch",
+            "002": "Kowloon Branch",
+            "003": "New Territories Branch",
+            "004": "Hong Kong Island Branch"
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const branchSelect = document.getElementById('branch');
+            for (const [key, value] of Object.entries(branches)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = value;
+                branchSelect.appendChild(option);
+            }
+
+            // Format amount input with commas and currency symbol
+            const amountDisplayInput = document.getElementById('amountDisplay');
+            const amountInput = document.getElementById('amount');
+            const currencySelect = document.getElementById('currency');
+
+            function formatAmount() {
+                const currencySymbol = currencySelect.options[currencySelect.selectedIndex].text.split(' ')[0];
+                let value = amountDisplayInput.value.replace(/,/g, '').replace(currencySymbol, '').trim();
+                if (!isNaN(value) && value !== '') {
+                    value = parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    amountDisplayInput.value = `${currencySymbol} ${value}`;
+                    amountInput.value = value.replace(/,/g, ''); // Store the numeric value in the hidden input
+                } else {
+                    amountInput.value = '';
+                }
+            }
+
+            amountDisplayInput.addEventListener('blur', formatAmount);
+            currencySelect.addEventListener('change', () => {
+                amountDisplayInput.value = '';
+                amountInput.value = '';
+            });
+
+            // Set default withdraw date to two days after today
+            const withdrawDateInput = document.getElementById('withdrawDate');
+            const today = new Date();
+            const twoDaysLater = new Date(today);
+            twoDaysLater.setDate(today.getDate() + 2);
+            const yyyy = twoDaysLater.getFullYear();
+            const mm = String(twoDaysLater.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const dd = String(twoDaysLater.getDate()).padStart(2, '0');
+            withdrawDateInput.value = `${yyyy}-${mm}-${dd}`;
+
+            // Add event listeners to navbar links
+            const navbarLinks = document.querySelectorAll('.navbar-link');
+            navbarLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    navbarLinks.forEach(link => link.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Function to check required fields
+            function checkRequiredFields() {
+                const requiredFields = [
+                    { id: 'customerName', name: 'Customer Name' },
+                    { id: 'mobileNumber', name: 'Mobile Number' },
+                    { id: 'currency', name: 'Currency' },
+                    { id: 'amount', name: 'Amount' },
+                    { id: 'cif', name: 'CIF' },
+                    { id: 'branch', name: 'Branch' },
+                    { id: 'withdrawDate', name: 'Withdraw Date' },
+                    { id: 'withdrawTime', name: 'Withdraw Time' }
+                ];
+
+                for (const field of requiredFields) {
+                    const element = document.getElementById(field.id);
+                    if (!element.value) {
+                        alert(`Please fill in the ${field.name}.`);
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // Handle form submission
+            const form = document.getElementById('appointmentForm');
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                if (!checkRequiredFields()) {
+                    return;
+                }
+
+                const customerName = document.getElementById('customerName').value;
+                const mobileNumber = document.getElementById('mobileNumber').value;
+                const currency = document.getElementById('currency').value;
+                const segment = document.getElementById('segment').value;
+                const amount = document.getElementById('amount').value;
+                const cif = document.getElementById('cif').value;
+                const branch = document.getElementById('branch').value;
+                const caseNumber = document.getElementById('caseNumber').value;
+                const withdrawDate = document.getElementById('withdrawDate').value;
+                const withdrawTime = document.getElementById('withdrawTime').value;
+
+                const dateTime = new Date().toLocaleString();
+
+                const modalMessage = `
+                    <table>
+                        <tr><th>Date and Time:</th><td>${dateTime}</td></tr>
+                        <tr><th>Customer Name:</th><td>${customerName}</td></tr>
+                        <tr><th>Customer Segment:</th><td>${segment}</td></tr>
+                        <tr><th>CIF:</th><td>${cif}</td></tr>
+                        <tr><th>Mobile Number:</th><td>${mobileNumber}</td></tr>
+                        <tr><th>Messages:</th><td>${customerName} wants to withdraw ${currency} ${amount} at BR${branch} on ${withdrawDate} at ${withdrawTime}</td></tr>
+                        <tr><th>Action Required:</th><td>Please call back ${customerName}</td></tr>
+                    </table>
+                `;
+
+                document.getElementById('modalMessage').innerHTML = modalMessage;
+                document.getElementById('modal').style.display = 'block';
+
+                const eml = {
+                    sender: `jw@dbx.com`,
+                    TO: branches[branch],
+                    CC: `A00001, A00002, A00003, A00004, A00005`,
+                    title: `${caseNumber} - ${customerName} wants to reserve ${amount} ${currency} at BR${branch} on ${withdrawDate} at ${withdrawTime}`,
+                    body: modalMessage
+                };
+
+                // Function to create and download .eml file
+                function createEMLFile(email) {
+                    const emlContent = `
+From: ${email.sender}
+To: ${email.TO}
+Cc: ${email.CC}
+Subject: ${email.title}
+Content-Type: text/html; charset=UTF-8
+
+${email.body}
+                    `;
+
+                    const blob = new Blob([emlContent], { type: 'text/plain' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'reserve-foreign-notes.eml';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+
+                // Call the function to create and download .eml file
+                createEMLFile(eml);
+            });
+
+            // Handle modal close
+            const modal = document.getElementById('modal');
+            const closeModal = document.querySelector('.close');
+            closeModal.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
