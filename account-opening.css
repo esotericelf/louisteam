@@ -10,27 +10,36 @@
 }
 
 .form-group {
+    display: flex;
+    align-items: center;
     margin-bottom: 15px;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
+    width: 150px;
+    /* Adjust the width as needed */
+    margin-right: 10px;
+    /* Space between label and input */
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-    width: 100%;
-    padding: 10px;
+    flex: 1;
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
+    padding: 10px;
 }
 
-.form-group textarea {
-    resize: vertical;
+#appointmentForm {
+    display: flex;
+    flex-direction: column;
+}
+
+#appointmentForm button {
+    margin-top: 20px;
+    align-items: center;
 }
 
 

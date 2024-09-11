@@ -137,6 +137,8 @@
                 const dateTime = new Date().toLocaleString();
 
                 const modalMessage = `
+                    Dear ${branch} colleagues,
+                    </br></br>
                     <table>
                         <tr><th>Date and Time:</th><td>${dateTime}</td></tr>
                         <tr><th>Name of Customer:</th><td>${name}</td></tr>
@@ -150,6 +152,37 @@
 
                 document.getElementById('modalMessage').innerHTML = modalMessage;
                 document.getElementById('modal').style.display = 'block';
+
+                const eml = {
+                    sender: `jw@dbx.com`,
+                    TO: branches[branch] + `, BDE`,
+                    CC: `A00001, A00002, A00003, A00004, A00005`,
+                    title: `${name} wants to open ${category} account at BR${branch} on ${appointmentDate} at ${appointmentTime}`,
+                    body: modalMessage
+                };
+
+                // Function to create and download .eml file
+                function createEMLFile(email) {
+                    const emlContent = `
+From: ${email.sender}
+To: ${email.TO}
+Cc: ${email.CC}
+Subject: ${email.title}
+Content-Type: text/html; charset=UTF-8
+${email.body}
+                    `;
+
+                    const blob = new Blob([emlContent], { type: 'text/plain' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'appointment.eml';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+
+                // Call the function to create and download .eml file
+                createEMLFile(eml);
             });
 
             // Handle modal close
@@ -164,6 +197,8 @@
                     modal.style.display = 'none';
                 }
             });
+
+
         });
     </script>
 </body>
